@@ -54,6 +54,23 @@ namespace Syndi
 
             BotClient = new DiscordClient(config);
 
+            List<string> dirsMissing = [.. FileManager.DirCheck().Result];
+
+            //Logging missing directories
+            if (dirsMissing.Count != 0)
+            {
+                string message = "Missing following directories:\n";
+
+                foreach (string dirMissing in dirsMissing)
+                {
+                    string dirMissingText = char.ToUpper(dirMissing[0]) + dirMissing[1..];
+
+                    message += $"\t\t\t\t\t\t\t\t{dirMissingText}\n";
+                }
+
+                BotClient.Logger.LogWarning(LoggerEvents.Startup, "{message}", message);
+            }
+
             BotClient.SessionCreated += BotClientReady;
 
             await BotClient.ConnectAsync();
