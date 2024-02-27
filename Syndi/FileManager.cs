@@ -103,12 +103,12 @@ namespace Syndi
 
         public struct ChannelSetting
         {
-            public List<string> RSSLinks;
+            public List<string> RSSLinks { get; set; }
         }
 
         public struct Messages
         {
-            public List<string> messages;
+            public List<string> MessagesList { get; set; }
         }
 
         private static string IDToPath(string guildID, string channelID)
@@ -128,11 +128,20 @@ namespace Syndi
 
             string jsonString = File.ReadAllText(path);
 
-            ChannelSetting? setting = new ChannelSetting();
+            ChannelSetting? setting = null;
 
             if (!string.IsNullOrEmpty(jsonString))
             {
                 setting = JsonConvert.DeserializeObject<ChannelSetting>(jsonString);
+            }
+            else
+            {
+                ChannelSetting newSettings = new()
+                {
+                    RSSLinks = []
+                };
+
+                setting = newSettings;
             }
 
             return setting;
@@ -140,93 +149,10 @@ namespace Syndi
 
         public static void WriteChannelSettings(ChannelSetting settings, string guildID, string channelID)
         {
-            ChannelSetting? setting;
-
-            string path = $"{IDToPath(guildID, channelID)}/settings.json";
-
-            FileInfo fileInfo = new(path);
-
-            try
-            {
-                setting = ReadChannelSettings(guildID, channelID);
-                fileInfo.Delete();
-            }
-            catch
-            {
-                setting = new ChannelSetting();
-            }
-
-            if (setting == null)
-            {
-                return;
-            }
-
-            foreach (string RSSLink in settings.RSSLinks)
-            {
-                setting.Value.RSSLinks?.Add(RSSLink);
-            }
-
-            using StreamWriter fileStream = File.CreateText(path);
-
-            JsonSerializerSettings serializerSettings = new()
-            {
-                Formatting = Formatting.Indented
-            };
-
-            string json = JsonConvert.SerializeObject(setting, serializerSettings);
-
-            fileStream.Write(json);
-        }
-
-        public static Messages? ReadSentMessages(string guildID, string channelID)
-        {
-            string path = $"{IDToPath(guildID, channelID)}/messages.json";
-
-            if (!FileExists(path))
-            {
-                CreateFile(path);
-            }
-
-            string jsonString = File.ReadAllText(path);
-
-            Messages? setting = new Messages();
-
-            if (!string.IsNullOrEmpty(jsonString))
-            {
-                setting = JsonConvert.DeserializeObject<Messages>(jsonString);
-            }
-
-            return setting;
-        }
-
-        public static void WriteSentMessage(Messages messages, string guildID, string channelID)
-        {
-            Messages? message;
-
             string path = $"{IDToPath(guildID, channelID)}/settings.json";
 
             CreateDirectory(IDToPath(guildID, channelID));
 
-            try
-            {
-                message = ReadSentMessages(guildID, channelID);
-                fileInfo.Delete();
-            }
-            catch
-            {
-                message = new Messages();
-            }
-
-            if (message == null)
-            {
-                return;
-            }
-
-            foreach (string messageEntry in messages.messages)
-            {
-                message.Value.messages?.Add(messageEntry);
-            }
-
             using StreamWriter fileStream = File.CreateText(path);
 
             JsonSerializerSettings serializerSettings = new()
@@ -234,7 +160,7 @@ namespace Syndi
                 Formatting = Formatting.Indented
             };
 
-            string json = JsonConvert.SerializeObject(message, serializerSettings);
+            string json = JsonConvert.SerializeObject(settings, serializerSettings);
 
             fileStream.Write(json);
         }
