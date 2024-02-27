@@ -7,7 +7,7 @@ namespace Syndi
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             MainAsync().GetAwaiter().GetResult();
         }
@@ -35,7 +35,7 @@ namespace Syndi
 
             string token = Tokens.Discord;
 
-            DiscordConfiguration config = new DiscordConfiguration()
+            DiscordConfiguration config = new()
             {
                 Token = token,
                 TokenType = TokenType.Bot,
