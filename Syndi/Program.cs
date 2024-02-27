@@ -1,7 +1,13 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Reflection;
+using System.ServiceModel.Syndication;
+using System.Xml;
+using static Syndi.FileManager;
 
 namespace Syndi
 {
@@ -16,6 +22,8 @@ namespace Syndi
         ///     Discord client
         /// </summary>
         public static DiscordClient? BotClient { get; private set; }
+
+        public static Dictionary<string, List<MessageItem>> Messages = [];
 
         /// <summary>
         ///     Main Thread
@@ -56,6 +64,11 @@ namespace Syndi
 
             List<string> dirsMissing = [.. FileManager.DirCheck().Result];
 
+            SlashCommandsExtension slashCommands = BotClient.UseSlashCommands();
+
+            slashCommands.RegisterCommands<SlashCommand>(766478619513585675);
+            slashCommands.RegisterCommands<SlashCommand>(1204085975463239750);
+
             //Logging missing directories
             if (dirsMissing.Count != 0)
             {
@@ -73,9 +86,99 @@ namespace Syndi
 
             BotClient.SessionCreated += BotClientReady;
 
-            await BotClient.ConnectAsync();
+            BotClient.Heartbeated += (async (client, args) =>
+            {
+                Paths paths = new();
 
-            BotClient.Logger.LogInformation(LoggerEvents.Startup, "Bot is now operational");
+                FieldInfo? field = typeof(Paths).GetField("dataPath");
+
+                if (field == null)
+                {
+                    return;
+                }
+
+                string? path = field.GetValue(paths)?.ToString();
+
+                if (path == null)
+                {
+                    return;
+                }
+
+                DirectoryInfo dirInfo = new(path);
+
+                if (dirInfo.GetDirectories().Length == 0)
+                {
+                    return;
+                }
+
+                foreach (DirectoryInfo guildDir in dirInfo.GetDirectories())
+                {
+                    foreach (DirectoryInfo channelDir in guildDir.GetDirectories())
+                    {
+                        ChannelSetting? settings = ReadChannelSettings(guildDir.Name, channelDir.Name);
+
+                        if (settings == null)
+                        {
+                            return;
+                        }
+
+                        List<MessageItem> messages;
+
+                        try
+                        {
+                            messages = Messages[guildDir.Name];
+                        }
+                        catch
+                        {
+                            messages = [];
+                        }
+
+                        foreach (string url in settings.Value.RSSLinks)
+                        {
+                            using XmlReader reader = XmlReader.Create(url);
+
+                            SyndicationFeed feed = SyndicationFeed.Load(reader);
+
+                            SyndicationItem post = feed.Items.First();
+
+                            if (messages.Where(message => message.MessageID == post.Id && message.ChannelID == channelDir.Name).Any())
+                            {
+                                return;
+                            }
+
+                            DiscordEmbedBuilder embed = new()
+                            {
+                                Title = post.Title.Text,
+                                Description = post.Summary.Text,
+                                Color = DiscordColor.HotPink,
+                                ImageUrl = feed.ImageUrl.ToString(),
+
+                                Url = post.Links.First().Uri.ToString()
+                            };
+
+                            ulong.TryParse(channelDir.Name, out ulong channelID);
+
+                            DiscordChannel channel = await BotClient.GetChannelAsync(channelID);
+
+                            await BotClient.SendMessageAsync(channel, $"## [Lue lisää]({post.Links.First().Uri})", embed.Build());
+
+                            MessageItem messageItem = new(channelDir.Name, post.Id);
+
+                            try
+                            {
+                                Messages[guildDir.Name].Add(messageItem);
+                            }
+                            catch
+                            {
+                                Messages.Add(guildDir.Name, []);
+                                Messages[guildDir.Name].Add(messageItem);
+                            }
+                        }
+                    }
+                }
+            });
+
+            await BotClient.ConnectAsync();
 
             await Task.Delay(-1);
         }
