@@ -87,6 +87,13 @@ namespace Syndi
             return directoryInfo.Exists;
         }
 
+        public static void CreateDirectory(string path)
+        {
+            DirectoryInfo directoryInfo = new(path);
+
+            directoryInfo.Create();
+        }
+
         public static void CreateFile(string fileDir)
         {
             FileInfo fileInfo = new(fileDir);
@@ -115,6 +122,7 @@ namespace Syndi
 
             if (!FileExists(path))
             {
+                CreateDirectory(IDToPath(guildID, channelID));
                 CreateFile(path);
             }
 
@@ -197,7 +205,7 @@ namespace Syndi
 
             string path = $"{IDToPath(guildID, channelID)}/settings.json";
 
-            FileInfo fileInfo = new(path);
+            CreateDirectory(IDToPath(guildID, channelID));
 
             try
             {
