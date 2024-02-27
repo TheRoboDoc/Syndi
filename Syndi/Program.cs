@@ -119,7 +119,7 @@ namespace Syndi
 
                         if (settings == null)
                         {
-                            return;
+                            continue;
                         }
 
                         List<MessageItem> messages;
@@ -127,10 +127,17 @@ namespace Syndi
                         try
                         {
                             messages = Messages[guildDir.Name];
+                            
+                            foreach (MessageItem messageItem in messages)
+                            {
+                                BotClient.Logger.LogDebug("Guild:{guild} Channel:{channel} Message:{message}", guildDir.Name, messageItem.ChannelID, messageItem.MessageID);
+                            }
                         }
                         catch
                         {
                             messages = [];
+
+                            BotClient.Logger.LogDebug("No messages");
                         }
 
                         foreach (string url in settings.Value.RSSLinks)
@@ -143,7 +150,8 @@ namespace Syndi
 
                             if (messages.Where(message => message.MessageID == post.Id && message.ChannelID == channelDir.Name).Any())
                             {
-                                return;
+                                BotClient.Logger.LogDebug("Found already sent messages");
+                                continue;
                             }
 
                             DiscordEmbedBuilder embed = new()
