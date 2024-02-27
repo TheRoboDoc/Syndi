@@ -84,7 +84,7 @@ namespace Syndi
 
                 WriteChannelSettings(channelSetting.Value, guildID, channelID);
 
-                await ctx.CreateResponseAsync($"Added {RSSLink} to {ctx.Channel.Mention}");
+                await ctx.CreateResponseAsync($"Added {RSSLink} to {ctx.Channel.Mention}", !visible);
             }
         }
     }
