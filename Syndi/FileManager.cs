@@ -1,10 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Syndi
 {
@@ -31,11 +26,11 @@ namespace Syndi
         /// </returns>
         public static async Task<List<string>> DirCheck()
         {
-            List<string> list = new List<string>();
+            List<string> list = [];
 
             await Task.Run(() =>
             {
-                Paths paths = new Paths();
+                Paths paths = new();
 
                 foreach (FieldInfo field in typeof(Paths).GetFields())
                 {
@@ -46,7 +41,7 @@ namespace Syndi
                         continue;
                     }
 
-                    DirectoryInfo directoryInfo = new DirectoryInfo(path);
+                    DirectoryInfo directoryInfo = new(path);
 
                     if (!directoryInfo.Exists)
                     {
@@ -80,21 +75,21 @@ namespace Syndi
         /// </returns>
         public static bool FileExists(string fileDir)
         {
-            FileInfo fileInfo = new FileInfo(fileDir);
+            FileInfo fileInfo = new(fileDir);
 
             return fileInfo.Exists;
         }
 
         public static bool DirectoryExists(string directoryDir)
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo(directoryDir);
+            DirectoryInfo directoryInfo = new(directoryDir);
 
             return directoryInfo.Exists;
         }
 
         public static void CreateFile(string fileDir)
         {
-            FileInfo fileInfo = new FileInfo(fileDir);
+            FileInfo fileInfo = new(fileDir);
 
             fileInfo.Create().Dispose();
         }
@@ -106,7 +101,7 @@ namespace Syndi
 
         public struct Messages
         {
-            public List<string> messages; 
+            public List<string> messages;
         }
 
         private static string IDToPath(string guildID, string channelID)
@@ -141,7 +136,7 @@ namespace Syndi
 
             string path = $"{IDToPath(guildID, channelID)}/settings.json";
 
-            FileInfo fileInfo = new FileInfo(path);
+            FileInfo fileInfo = new(path);
 
             try
             {
@@ -165,7 +160,7 @@ namespace Syndi
 
             using StreamWriter fileStream = File.CreateText(path);
 
-            JsonSerializerSettings serializerSettings = new JsonSerializerSettings()
+            JsonSerializerSettings serializerSettings = new()
             {
                 Formatting = Formatting.Indented
             };
@@ -202,7 +197,7 @@ namespace Syndi
 
             string path = $"{IDToPath(guildID, channelID)}/settings.json";
 
-            FileInfo fileInfo = new FileInfo(path);
+            FileInfo fileInfo = new(path);
 
             try
             {
@@ -219,14 +214,14 @@ namespace Syndi
                 return;
             }
 
-            foreach (string RSSLink in messages.messages)
+            foreach (string messageEntry in messages.messages)
             {
-                message.Value.messages?.Add(RSSLink);
+                message.Value.messages?.Add(messageEntry);
             }
 
             using StreamWriter fileStream = File.CreateText(path);
 
-            JsonSerializerSettings serializerSettings = new JsonSerializerSettings()
+            JsonSerializerSettings serializerSettings = new()
             {
                 Formatting = Formatting.Indented
             };

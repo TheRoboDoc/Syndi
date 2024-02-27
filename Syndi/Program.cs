@@ -40,7 +40,7 @@ namespace Syndi
                 Token = token,
                 TokenType = TokenType.Bot,
 
-                Intents = 
+                Intents =
                     DiscordIntents.MessageContents |
                     DiscordIntents.Guilds |
                     DiscordIntents.GuildMessages |
