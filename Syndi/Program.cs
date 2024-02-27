@@ -12,8 +12,14 @@ namespace Syndi
             MainAsync().GetAwaiter().GetResult();
         }
 
+        /// <summary>
+        ///     Discord client
+        /// </summary>
         public static DiscordClient? BotClient { get; private set; }
 
+        /// <summary>
+        ///     Main Thread
+        /// </summary>
         static async Task MainAsync()
         {
             LogLevel logLevel;
@@ -57,6 +63,21 @@ namespace Syndi
             await Task.Delay(-1);
         }
 
+        /// <summary>
+        ///     Checks if the bot is running in a debug enviroment
+        /// </summary>
+        /// 
+        /// <returns>
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <c>True</c>: In debug
+        ///         </item>
+        /// 
+        ///         <item>
+        ///             <c>False</c>: Not in debug
+        ///         </item>
+        ///     </list>
+        /// </returns>
         public static bool DebugStatus()
         {
             bool debugState;
@@ -73,6 +94,17 @@ namespace Syndi
             return debugState;
         }
 
+        /// <summary>
+        ///     What happens once the client is ready
+        /// </summary>
+        /// 
+        /// <param name="sender">
+        ///     Client that triggered this task
+        /// </param>
+        /// 
+        /// <param name="e">
+        ///     Ready event arguments arguments
+        /// </param>
         private static async Task BotClientReady(DiscordClient sender, SessionReadyEventArgs args)
         {
             await Task.Run(() =>
