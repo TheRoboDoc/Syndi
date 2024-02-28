@@ -66,8 +66,15 @@ namespace Syndi
 
             SlashCommandsExtension slashCommands = BotClient.UseSlashCommands();
 
-            slashCommands.RegisterCommands<SlashCommand>(766478619513585675);
-            slashCommands.RegisterCommands<SlashCommand>(1204085975463239750);
+            if (DebugStatus())
+            {
+                slashCommands.RegisterCommands<SlashCommand>(766478619513585675);
+                slashCommands.RegisterCommands<SlashCommand>(1204085975463239750);
+            }
+            else
+            {
+                slashCommands.RegisterCommands<SlashCommand>();
+            }
 
             //Logging missing directories
             if (dirsMissing.Count != 0)
