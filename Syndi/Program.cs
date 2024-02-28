@@ -171,7 +171,10 @@ namespace Syndi
                                 Url = post.Links.First().Uri.ToString()
                             };
 
-                            ulong.TryParse(channelDir.Name, out ulong channelID);
+                            if (!ulong.TryParse(channelDir.Name, out ulong channelID))
+                            {
+                                continue;
+                            }
 
                             DiscordChannel channel = await BotClient.GetChannelAsync(channelID);
 
